@@ -86,7 +86,6 @@ command [:ta, 'trabalho-academico'] do |c|
     info = YAML.load_file(options[:info])
     resumos = YAML.load_file(options[:resumos])
 
-    file_system = Liquid::LocalFileSystem.new("/some/path")
     puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(info)
 
     if options['capa']

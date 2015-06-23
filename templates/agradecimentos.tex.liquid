@@ -1,0 +1,11 @@
+% ---
+% Agradecimentos {% unless agradecimentos %}- ausente{% endunless %}
+% ---
+{% if agradecimentos %}
+\begin{agradecimentos}
+
+{{agradecimentos}}
+
+\end{agradecimentos}
+% ---
+{% endif %}

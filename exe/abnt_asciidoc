@@ -1,3 +1,82 @@
 #!/usr/bin/env ruby
 
-require "abnt_asciidoc"
+require 'gli'
+
+begin # XXX: Remove this begin/rescue before distributing your app
+require 'abnt_asciidoc'
+rescue LoadError
+  STDERR.puts "In development, you need to use `bundle exec bin/todo` to run your app"
+  STDERR.puts "At install-time, RubyGems will make sure lib, etc. are in the load path"
+  STDERR.puts "Feel free to remove this message from bin/todo now"
+  exit 64
+end
+
+include GLI::App
+
+program_desc 'Describe your application here'
+
+version AbntAsciidoc::VERSION
+
+subcommand_option_handling :normal
+arguments :strict
+
+desc 'Gera documento Latex na norma ABNT, a partir de Asciidoc.'
+command :latex do |c|
+
+  c.desc "Tipo do documento."
+  c.flag [:t,:tipo], :default_value => 'trabalho-academico'
+
+  c.desc "Texto do resumo."
+  c.flag [:r,:resumo]
+
+  c.desc "Palavras-chave do resumo."
+  c.flag [:p,'palavras-chave']
+
+  c.desc "Texto do resumo em inglês (abstract)."
+  c.flag [:ri, :abstract]
+
+  c.desc "Palavras-chave do resumo em inglês (keywords)."
+  c.flag [:k, :keywords]
+
+  c.desc "Gera os agradecimentos."
+  c.flag [:a,:agradecimentos]
+
+  c.desc "Gera a dedicatória."
+  c.flag [:d,:dedicatoria]
+
+  c.desc "Gera a epígrafe."
+  c.flag [:e,:epigrafe]
+
+  c.action do |global_options,options,args|
+
+    puts Liquid::Template.parse(IO.read('templates/agradecimentos.tex.liquid')).render(options)
+    puts Liquid::Template.parse(IO.read('templates/dedicatoria.tex.liquid')).render(options)
+    puts Liquid::Template.parse(IO.read('templates/epigrafe.tex.liquid')).render(options)
+    puts Liquid::Template.parse(IO.read('templates/resumo.tex.liquid')).render(options)
+
+
+  end
+end
+
+pre do |global,command,options,args|
+  # Pre logic here
+  # Return true to proceed; false to abort and not call the
+  # chosen command
+  # Use skips_pre before a command to skip this block
+  # on that command only
+  true
+end
+
+post do |global,command,options,args|
+  # Post logic here
+  # Use skips_post before a command to skip this
+  # block on that command only
+end
+
+on_error do |exception|
+  # Error logic here
+  # return false to skip default error handling
+  true
+end
+
+exit run(ARGV)

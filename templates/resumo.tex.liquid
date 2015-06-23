@@ -1,0 +1,35 @@
+% ---
+% RESUMOS
+% ---
+
+% resumo em português
+\setlength{\absparsep}{18pt} % ajusta o espaçamento dos parágrafos do resumo
+
+\begin{resumo}
+
+{% if resumo %}
+{{resumo}}
+{% else %}
+Falta elaborar o resumo.
+{% endif %}
+
+\textbf{Palavras-chave}: {{palavras-chave}}
+
+\end{resumo}
+
+% resumo em inglês
+\begin{resumo}[Abstract]
+ \begin{otherlanguage*}{english}
+
+{% if abstract %}
+  {{abstract}}
+{% else %}
+  Deseja contratar um serviço de tradução? http://camyle.github.io
+{% endif %}
+
+   \vspace{\onelineskip}
+
+   \noindent
+   \textbf{Keywords}: {{keywords}}
+ \end{otherlanguage*}
+\end{resumo}

@@ -1,0 +1,17 @@
+{% if dedicatoria %}
+% ---
+% Dedicatória
+% ---
+\begin{dedicatoria}
+   \vspace*{\fill}
+   \centering
+   \noindent
+   \textit{ {{dedicatoria}} } \vspace*{\fill}
+
+\end{dedicatoria}
+% ---
+{% else %}
+% ---
+% Dedicatória - ausente
+% ---
+{% endif %}

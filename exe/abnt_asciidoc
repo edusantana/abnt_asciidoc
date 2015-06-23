@@ -12,6 +12,17 @@ version AbntAsciidoc::VERSION
 subcommand_option_handling :normal
 arguments :strict
 
+desc 'Testa alguma coisa'
+command [:test] do |c|
+
+  c.action do |global_options,options,args|
+    templates = File.expand_path('../../lib/templates', __FILE__)
+    Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates)
+    puts Liquid::Template.parse("{% include 'informacoes' %}").render()
+  end
+
+end
+
 desc 'Gera um trabalho acadêmico com as normas da ABNT: monografia, dissertação, tese.'
 long_desc <<EOS
 A partir dos parâmetros passados cria um arquivo Latex com a biblioteca abntex2,
@@ -71,9 +82,11 @@ command [:ta, 'trabalho-academico'] do |c|
   c.action do |global_options,options,args|
 
     templates = File.expand_path('../../lib/templates', __FILE__)
+    Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates)
     info = YAML.load_file(options[:info])
     resumos = YAML.load_file(options[:resumos])
 
+    file_system = Liquid::LocalFileSystem.new("/some/path")
     puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(info)
 
     if options['capa']

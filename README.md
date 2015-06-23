@@ -22,6 +22,22 @@ Or install it yourself as:
 
     $ gem install abnt_asciidoc
 
+### Bash Completion
+
+Put this in your .bashrc:
+
+```bash
+complete -F get_abnt_asciidoc_targets abnt_asciidoc
+function get_abnt_asciidoc_targets()
+{
+   if [ -z $2 ] ; then
+       COMPREPLY=(`abnt_asciidoc help -c`)
+   else
+       COMPREPLY=(`abnt_asciidoc help -c $2`)
+   fi
+}
+```
+
 ## Usage
 
 TODO: Write usage instructions here

@@ -1,0 +1,22 @@
+% ---
+% Informações de dados para CAPA e FOLHA DE ROSTO
+% ---
+\titulo{ {{titulo}} }
+\autor{ {{autor}} }
+\local{ {{local}} }
+\data{ {{data | date: "%Y"}} }
+\orientador{ {{orientador}} }
+{%if coorientador %}
+\coorientador{ {{coorientador}} }
+{% endif%}
+\instituicao{ %
+  {{instituicao}}
+  \par
+  {{curso}}
+  \par
+  {{programa}}}
+\tipotrabalho{ {{tipo_trabalho}} }
+% O preambulo deve conter o tipo do trabalho, o objetivo,
+% o nome da instituição e a área de concentração
+\preambulo{ {{preambulo}} }
+% ---

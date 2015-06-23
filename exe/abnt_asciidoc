@@ -1,59 +1,100 @@
 #!/usr/bin/env ruby
 
 require 'gli'
-
-begin # XXX: Remove this begin/rescue before distributing your app
 require 'abnt_asciidoc'
-rescue LoadError
-  STDERR.puts "In development, you need to use `bundle exec bin/todo` to run your app"
-  STDERR.puts "At install-time, RubyGems will make sure lib, etc. are in the load path"
-  STDERR.puts "Feel free to remove this message from bin/todo now"
-  exit 64
-end
 
 include GLI::App
 
-program_desc 'Describe your application here'
+program_desc 'Gera documentos na norma da ABNT a partir de textos escritos em Asciidoc.'
 
 version AbntAsciidoc::VERSION
 
 subcommand_option_handling :normal
 arguments :strict
 
-desc 'Gera documento Latex na norma ABNT, a partir de Asciidoc.'
-command :latex do |c|
-
-  c.desc "Tipo do documento."
-  c.flag [:t,:tipo], :default_value => 'trabalho-academico'
+desc 'Gera um trabalho acadêmicona com as normas da ABNT: monografia, dissertação, tese.'
+long_desc <<EOS
+A partir dos parâmetros passados cria um arquivo Latex com a biblioteca abntex2,
+em conformidade com os padrões da ABNT para Trabalhos Acadêmicos.
+Os arquivos de texto dos capítulos são convertidos de Asciidoc para Latex,
+utilizando `asciidoctor-latex`. Depois será necessário utilizar outro comando
+para gerar o pdf.
+EOS
+arg :capitulos, [:optional, :multiple]
+arg_name "[capitulo-asciidoc]*"
+command :tacademico do |c|
 
   c.desc "Texto do resumo."
-  c.flag [:r,:resumo]
+  c.flag [:r,:resumo], :arg_name => '"texto"'
 
   c.desc "Palavras-chave do resumo."
-  c.flag [:p,'palavras-chave']
+  c.flag [:p,'palavras-chave'], :arg_name => "'p1. p2. p3.'"
 
   c.desc "Texto do resumo em inglês (abstract)."
-  c.flag [:ri, :abstract]
+  c.flag [:ri, :abstract],  :arg_name => '"texto"'
 
+  c.long_desc "As palavras-chave são separadas por ponto."
   c.desc "Palavras-chave do resumo em inglês (keywords)."
-  c.flag [:k, :keywords]
+  c.flag [:k, :keywords], :arg_name => "'p1. p2. p3.'"
 
   c.desc "Gera os agradecimentos."
-  c.flag [:a,:agradecimentos]
+  c.flag [:a,:agradecimentos],  :arg_name => '"texto"'
 
   c.desc "Gera a dedicatória."
-  c.flag [:d,:dedicatoria]
+  c.flag [:d,:dedicatoria], :arg_name => '"texto"'
 
   c.desc "Gera a epígrafe."
-  c.flag [:e,:epigrafe]
+  c.flag [:e,:epigrafe], :arg_name => '"texto"'
+
+  c.desc "Lista as ilustrações."
+  c.switch :ilustracoes, :negatable => false
+
+  c.desc "Lista as tabelas."
+  c.switch :tabelas, :negatable => false
+
+  c.desc "Lista as siglas. As siglas são separadas por ponto."
+  c.flag :siglas, :arg_name => '"A:aaa. B:bbb."'
+
+  # Os simbolos não serão utilizados nesta versão.
+  #c.desc "Lista os simbolos."
+  #c.flag ['lista-simbolos', 'lb']
 
   c.action do |global_options,options,args|
 
-    puts Liquid::Template.parse(IO.read('templates/agradecimentos.tex.liquid')).render(options)
-    puts Liquid::Template.parse(IO.read('templates/dedicatoria.tex.liquid')).render(options)
-    puts Liquid::Template.parse(IO.read('templates/epigrafe.tex.liquid')).render(options)
-    puts Liquid::Template.parse(IO.read('templates/resumo.tex.liquid')).render(options)
+    puts Liquid::Template.parse(IO.read('templates/agradecimentos.tex.liquid')).render(options) if options['agradecimentos']
+    puts Liquid::Template.parse(IO.read('templates/dedicatoria.tex.liquid')).render(options) if options['dedicatoria']
+    puts Liquid::Template.parse(IO.read('templates/epigrafe.tex.liquid')).render(options) if options['epigrafe']
+    puts Liquid::Template.parse(IO.read('templates/resumo.tex.liquid')).render(options) if options['resumo']
+    puts Liquid::Template.parse(IO.read('templates/lista-ilustracoes.tex.liquid')).render(options) if options['lista-ilustracoes']
+    puts Liquid::Template.parse(IO.read('templates/lista-tabelas.tex.liquid')).render(options) if options['lista-tabelas']
 
+    if options['lista-siglas']
+      # format: "A:aaa. B:bbb."
+      siglas = {}
+      options['lista-siglas'].split(/\./).each do |pair|
+        sigla,descricao = pair.split(/:/)
+        siglas[sigla.lstrip] = descricao.lstrip
+        puts "adding #{sigla} - #{descricao}"
+      end
+
+      puts "options['lista-siglas'] : #{options['lista-siglas']}"
+      puts "options['lista-siglas'].split(/\./) : #{options['lista-siglas'].split(/\./)}"
+
+      options['lista-siglas']
+      puts Liquid::Template.parse(IO.read('templates/lista-siglas.tex.liquid')).render('siglas' => siglas)
+    end
+
+    # Converte arquivos dos capítulos em asciidoc e converte para Latex imprimindo-os na saída
+    args.each do |capitulo|
+      texto_em_asciidoc = IO.read(capitulo)
+      COMANDO_CONVERSAO_CAPITULO = "asciidoctor-latex -a header=no -"
+      Open3.popen3(COMANDO_CONVERSAO_CAPITULO) {|stdin, stdout, stderr, wait_thr|
+        pid = wait_thr.pid # pid of the started process.
+        stdin.puts texto_em_asciidoc
+        stdin.close
+        puts stdout.read  # texto convertivo para Latex
+      }
+    end
 
   end
 end

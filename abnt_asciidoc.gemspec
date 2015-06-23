@@ -30,4 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "gli"
   spec.add_development_dependency "liquid"
   spec.add_development_dependency "json"
+
+  spec.add_development_dependency "asciidoctor-latex"
+  spec.add_development_dependency "thread_safe" # asciidoctor: WARNING: gem 'thread_safe' is not installed. This gem recommended when registering custom converters.
+
 end

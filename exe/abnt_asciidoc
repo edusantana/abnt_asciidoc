@@ -12,7 +12,7 @@ version AbntAsciidoc::VERSION
 subcommand_option_handling :normal
 arguments :strict
 
-desc 'Gera um trabalho acadêmicona com as normas da ABNT: monografia, dissertação, tese.'
+desc 'Gera um trabalho acadêmico com as normas da ABNT: monografia, dissertação, tese.'
 long_desc <<EOS
 A partir dos parâmetros passados cria um arquivo Latex com a biblioteca abntex2,
 em conformidade com os padrões da ABNT para Trabalhos Acadêmicos.
@@ -22,7 +22,7 @@ para gerar o pdf.
 EOS
 arg :capitulos, [:optional, :multiple]
 arg_name "[capitulo-asciidoc]*"
-command :tacademico do |c|
+command [:tacademico, 'trabalho-academico'] do |c|
 
   c.desc "Texto do resumo."
   c.flag [:r,:resumo], :arg_name => '"texto"'
@@ -59,6 +59,13 @@ command :tacademico do |c|
   #c.desc "Lista os simbolos."
   #c.flag ['lista-simbolos', 'lb']
 
+  c.desc "Lista as siglas. As siglas são separadas por ponto."
+  c.flag [:i, :info], :arg_name => 'info-file', :default_value => 'config/1-informacoes.yaml'
+
+
+  c.desc "Gera a capa do trabalho. As informações serão lidas do arquivo de informação. Ver --info."
+  c.switch :capa
+
   c.action do |global_options,options,args|
 
     puts Liquid::Template.parse(IO.read('templates/agradecimentos.tex.liquid')).render(options) if options['agradecimentos']
@@ -85,15 +92,20 @@ command :tacademico do |c|
     end
 
     # Converte arquivos dos capítulos em asciidoc e converte para Latex imprimindo-os na saída
-    args.each do |capitulo|
-      texto_em_asciidoc = IO.read(capitulo)
-      COMANDO_CONVERSAO_CAPITULO = "asciidoctor-latex -a header=no -"
-      Open3.popen3(COMANDO_CONVERSAO_CAPITULO) {|stdin, stdout, stderr, wait_thr|
-        pid = wait_thr.pid # pid of the started process.
-        stdin.puts texto_em_asciidoc
-        stdin.close
-        puts stdout.read  # texto convertivo para Latex
-      }
+    if args
+      puts Liquid::Template.parse(IO.read('templates/textuais.tex.liquid')).render()
+      puts
+
+      args.each do |capitulo|
+        texto_em_asciidoc = IO.read(capitulo)
+        COMANDO_CONVERSAO_CAPITULO = "asciidoctor-latex -a header=no -"
+        Open3.popen3(COMANDO_CONVERSAO_CAPITULO) {|stdin, stdout, stderr, wait_thr|
+          pid = wait_thr.pid # pid of the started process.
+          stdin.puts texto_em_asciidoc
+          stdin.close
+          puts stdout.read  # texto convertivo para Latex
+        }
+      end
     end
 
   end

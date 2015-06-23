@@ -1,8 +1,10 @@
-# AbntAsciidoc
+# abnt_asciidoc
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/abnt_asciidoc`. To experiment with that code, run `bin/console` for an interactive prompt.
+Com esta ferramenta você poderá compilar seu trabalho acadêmico.
 
-TODO: Delete this and the text above, and describe your gem
+Faça um [fork de edusantana/abntex2-modelo-trabalho-academico-asciidoc/fork](https://github.com/edusantana/abntex2-modelo-trabalho-academico-asciidoc/fork).
+
+Utilize esta ferramenta para compilar o seu trabalho. (ainda em construção)
 
 ## Installation
 

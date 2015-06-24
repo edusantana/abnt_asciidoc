@@ -19,10 +19,11 @@ command [:test] do |c|
     templates = File.expand_path('../../lib/templates', __FILE__)
     #Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, '.liquid')
     #puts Liquid::Template.parse("{% include 'informacoes' %}").render()
-    puts templates
 
-    Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates)
-    puts Liquid::Template.parse("{% include 'xxx' %}")
+
+    Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, "%s.tex.liquid")
+    puts Liquid::Template.file_system
+    puts Liquid::Template.parse("{% include 'xxx' %}").render()
   end
 
 end
@@ -86,7 +87,7 @@ command [:ta, 'trabalho-academico'] do |c|
   c.action do |global_options,options,args|
 
     templates = File.expand_path('../../lib/templates', __FILE__)
-    Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates)
+    Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, "%s.tex.liquid")
     info = YAML.load_file(options[:info])
     resumos = YAML.load_file(options[:resumos])
 

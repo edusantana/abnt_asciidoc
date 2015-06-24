@@ -64,8 +64,8 @@ command [:ta, 'trabalho-academico'] do |c|
   c.desc "Lista as tabelas."
   c.switch :tabelas, :negatable => false
 
-  c.desc "Lista as siglas. As siglas são separadas por ponto."
-  c.flag :siglas, :arg_name => '"A:aaa. B:bbb."'
+  #c.desc "Lista as siglas. As siglas são separadas por ponto."
+  #c.flag :siglas, :arg_name => '"A:aaa. B:bbb."'
 
   # Os simbolos não serão utilizados nesta versão.
   #c.desc "Lista os simbolos."
@@ -75,12 +75,20 @@ command [:ta, 'trabalho-academico'] do |c|
   c.flag [:i, :info], :arg_name => 'info-file', :default_value => 'config/1-informacoes.yaml'
   c.desc "Arquivo contendo informações para o resumo e abstract."
   c.flag [:resumos], :arg_name => 'resumo-file', :default_value => 'config/2-resumos.yaml'
+  c.desc "Arquivo contendo as siglas."
+  c.flag [:siglas], :arg_name => 'siglas-file', :default_value => 'config/siglas.yaml'
+
 
 
   c.desc "Gera a capa do trabalho. As informações serão lidas do arquivo de informação. Ver --info."
   c.switch :capa
 
   c.action do |global_options,options,args|
+
+
+
+    siglas = YAML.load_file(options['siglas'])
+    options['siglas'] = siglas
 
     options['data'] = Time.now
     if options['capa']
@@ -116,7 +124,7 @@ command [:ta, 'trabalho-academico'] do |c|
 
       args.each do |capitulo|
         texto_em_asciidoc = IO.read(capitulo)
-        COMANDO_CONVERSAO_CAPITULO = "asciidoctor-latex -a header=no -"
+        COMANDO_CONVERSAO_CAPITULO = "asciidoctor-latex -a header=no -d book -"
         Open3.popen3(COMANDO_CONVERSAO_CAPITULO) {|stdin, stdout, stderr, wait_thr|
           pid = wait_thr.pid # pid of the started process.
           stdin.puts texto_em_asciidoc
@@ -130,9 +138,6 @@ command [:ta, 'trabalho-academico'] do |c|
     templates = File.expand_path('../../lib/templates', __FILE__)
     Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, "%s.tex.liquid")
     puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(options)
-
-
-
 
   end
 end

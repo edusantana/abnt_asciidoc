@@ -62,7 +62,7 @@
 % ---
 % Pacotes adicionais, usados apenas no âmbito do Modelo Canônico do abnteX2
 % ---
-%\usepackage{lipsum}				% para geração de dummy text
+\usepackage{lipsum}				% para geração de dummy text
 % ---
 
 % ---
@@ -248,14 +248,8 @@ Zootecnia, Universidade de São Paulo, São Paulo, 2011.
 \cleardoublepage
 % ---
 
-% ---
-% inserir lista de abreviaturas e siglas
-% ---
-\begin{siglas}
-  \item[ABNT] Associação Brasileira de Normas Técnicas
-  \item[abnTeX] ABsurdas Normas para TeX
-\end{siglas}
-% ---
+{% include 'siglas' %}
+
 
 % ---
 % inserir lista de símbolos
@@ -289,6 +283,18 @@ Zootecnia, Universidade de São Paulo, São Paulo, 2011.
 {% for capitulo in capitulos %}
 {{ capitulo }}
 {% endfor %}
+
+% ---
+% Capitulo de revisão de literatura
+% ---
+\chapter{Dudu}
+% ---
+
+% ---
+\section{xDudu}
+% ---
+
+texto aqui.
 
 % ----------------------------------------------------------
 % ELEMENTOS PÓS-TEXTUAIS

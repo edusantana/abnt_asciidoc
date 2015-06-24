@@ -18,7 +18,7 @@ command [:test] do |c|
   c.action do |global_options,options,args|
     templates = File.expand_path('../../lib/templates', __FILE__)
     Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, "%s.tex.liquid")
-    options = {'info' => 'meu resumo', 'titulo' => 'meu-titulo', 'dedicatoria'=>'xdedicatoria'}
+    options = {'info' => 'meu resumo', 'titulo' => 'meu-titulo', 'dedicatoria'=>'xdedicatoria', 'resumo'=>'xresumo', 'capitulos' => ["cap1", "cap2"]}
     puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(options)
   end
 
@@ -82,26 +82,18 @@ command [:ta, 'trabalho-academico'] do |c|
 
   c.action do |global_options,options,args|
 
-    templates = File.expand_path('../../lib/templates', __FILE__)
-    Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, "%s.tex.liquid")
-    info = YAML.load_file(options[:info])
-    resumos = YAML.load_file(options[:resumos])
-
-    #puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(info)
-
-
+    options['data'] = Time.now
     if options['capa']
-      info['data'] = Time.now
       #info = IO.read()
-      puts Liquid::Template.parse(IO.read("#{templates}/informacoes.tex.liquid")).render(info)
+      #puts Liquid::Template.parse(IO.read("#{templates}/informacoes.tex.liquid")).render(info)
     end
 
-    puts Liquid::Template.parse(IO.read("#{templates}/agradecimentos.tex.liquid")).render(options) if options['agradecimentos']
-    puts Liquid::Template.parse(IO.read("#{templates}/dedicatoria.tex.liquid")).render(options) if options['dedicatoria']
-    puts Liquid::Template.parse(IO.read("#{templates}/epigrafe.tex.liquid")).render(options) if options['epigrafe']
-    puts Liquid::Template.parse(IO.read("#{templates}/resumo.tex.liquid")).render(options) if options['resumo']
-    puts Liquid::Template.parse(IO.read("#{templates}/lista-ilustracoes.tex.liquid")).render(options) if options['lista-ilustracoes']
-    puts Liquid::Template.parse(IO.read("#{templates}/lista-tabelas.tex.liquid")).render(options) if options['lista-tabelas']
+    #puts Liquid::Template.parse(IO.read("#{templates}/agradecimentos.tex.liquid")).render(options) if options['agradecimentos']
+    #puts Liquid::Template.parse(IO.read("#{templates}/dedicatoria.tex.liquid")).render(options) if options['dedicatoria']
+    #puts Liquid::Template.parse(IO.read("#{templates}/epigrafe.tex.liquid")).render(options) if options['epigrafe']
+    #puts Liquid::Template.parse(IO.read("#{templates}/resumo.tex.liquid")).render(options) if options['resumo']
+    #puts Liquid::Template.parse(IO.read("#{templates}/lista-ilustracoes.tex.liquid")).render(options) if options['lista-ilustracoes']
+    #puts Liquid::Template.parse(IO.read("#{templates}/lista-tabelas.tex.liquid")).render(options) if options['lista-tabelas']
 
     if options['lista-siglas']
       # format: "A:aaa. B:bbb."
@@ -111,18 +103,16 @@ command [:ta, 'trabalho-academico'] do |c|
         siglas[sigla.lstrip] = descricao.lstrip
         puts "adding #{sigla} - #{descricao}"
       end
+      options['siglas'] = siglas
 
-      puts "options['lista-siglas'] : #{options['lista-siglas']}"
-      puts "options['lista-siglas'].split(/\./) : #{options['lista-siglas'].split(/\./)}"
-
-      options['lista-siglas']
-      puts Liquid::Template.parse(IO.read("#{templates}/lista-siglas.tex.liquid")).render('siglas' => siglas)
+      #puts Liquid::Template.parse(IO.read("#{templates}/lista-siglas.tex.liquid")).render('siglas' => siglas)
     end
 
     # Converte arquivos dos capítulos em asciidoc e converte para Latex imprimindo-os na saída
+    capitulos = []
     if args
-      puts Liquid::Template.parse(IO.read("#{templates}/textuais.tex.liquid")).render()
-      puts
+      #puts Liquid::Template.parse(IO.read("#{templates}/textuais.tex.liquid")).render()
+      #puts
 
       args.each do |capitulo|
         texto_em_asciidoc = IO.read(capitulo)
@@ -131,12 +121,18 @@ command [:ta, 'trabalho-academico'] do |c|
           pid = wait_thr.pid # pid of the started process.
           stdin.puts texto_em_asciidoc
           stdin.close
-          puts stdout.read  # texto convertivo para Latex
+          capitulos << stdout.read  # texto convertivo para Latex
         }
       end
     end
+    options['capitulos']=capitulos # adiciona os capítulos para rederizar no template
 
-    puts options
+    templates = File.expand_path('../../lib/templates', __FILE__)
+    Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, "%s.tex.liquid")
+    puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(options)
+
+
+
 
   end
 end

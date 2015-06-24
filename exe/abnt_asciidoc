@@ -18,7 +18,7 @@ command [:test] do |c|
   c.action do |global_options,options,args|
     templates = File.expand_path('../../lib/templates', __FILE__)
     Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, "%s.tex.liquid")
-    options = {'info' => 'meu resumo', 'titulo' => 'meu-titulo'}
+    options = {'info' => 'meu resumo', 'titulo' => 'meu-titulo', 'dedicatoria'=>'xdedicatoria'}
     puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(options)
   end
 

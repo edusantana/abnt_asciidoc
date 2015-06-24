@@ -17,13 +17,9 @@ command [:test] do |c|
 
   c.action do |global_options,options,args|
     templates = File.expand_path('../../lib/templates', __FILE__)
-    #Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, '.liquid')
-    #puts Liquid::Template.parse("{% include 'informacoes' %}").render()
-
-
     Liquid::Template.file_system = Liquid::LocalFileSystem.new(templates, "%s.tex.liquid")
-    puts Liquid::Template.file_system
-    puts Liquid::Template.parse("{% include 'xxx' %}").render()
+    options = {'info' => 'meu resumo', 'titulo' => 'meu-titulo'}
+    puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(options)
   end
 
 end
@@ -91,7 +87,8 @@ command [:ta, 'trabalho-academico'] do |c|
     info = YAML.load_file(options[:info])
     resumos = YAML.load_file(options[:resumos])
 
-    puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(info)
+    #puts Liquid::Template.parse(IO.read("#{templates}/abntex2-modelo-trabalho-academico.tex.liquid")).render(info)
+
 
     if options['capa']
       info['data'] = Time.now
@@ -138,6 +135,8 @@ command [:ta, 'trabalho-academico'] do |c|
         }
       end
     end
+
+    puts options
 
   end
 end

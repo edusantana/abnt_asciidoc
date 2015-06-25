@@ -24,6 +24,23 @@ command [:test] do |c|
 
 end
 
+
+desc 'Compila rascunho.adoc para latex'
+command [:rascunho] do |c|
+
+  c.action do |global_options,options,args|
+    comando_conversao_capitulo = "asciidoctor-latex -b latex -d book -a header=no -a numbered rascunho.adoc"
+    Open3.popen3(comando_conversao_capitulo) {|stdin, stdout, stderr, wait_thr|
+      pid = wait_thr.pid # pid of the started process.
+      stdin.close
+      puts stdout.read
+      puts stderr.read
+    }
+  end
+
+end
+
+
 desc 'Gera um trabalho acadêmico com as normas da ABNT: monografia, dissertação, tese.'
 long_desc <<EOS
 A partir dos parâmetros passados cria um arquivo Latex com a biblioteca abntex2,
@@ -74,7 +91,7 @@ command [:ta, 'trabalho-academico'] do |c|
   c.desc "Arquivo contendo informações sobre o documento."
   c.flag [:i, :info], :arg_name => 'info-file', :default_value => 'config/1-informacoes.yaml'
   c.desc "Arquivo contendo informações para o resumo e abstract."
-  c.flag [:resumos], :arg_name => 'resumo-file', :default_value => 'config/2-resumos.yaml'
+  c.flag [:resumos], :arg_name => 'resumo-file', :default_value => 'config/resumos.yaml'
   c.desc "Arquivo contendo as siglas."
   c.flag [:siglas], :arg_name => 'siglas-file', :default_value => 'config/siglas.yaml'
 
@@ -85,10 +102,16 @@ command [:ta, 'trabalho-academico'] do |c|
 
   c.action do |global_options,options,args|
 
+    info = YAML.load_file(options['info'])
+    options.merge!(info)
 
 
     siglas = YAML.load_file(options['siglas'])
     options['siglas'] = siglas
+
+    resumos = YAML.load_file(options['resumos'])
+    options.merge!(resumos)
+
 
     options['data'] = Time.now
     if options['capa']
@@ -116,22 +139,18 @@ command [:ta, 'trabalho-academico'] do |c|
       #puts Liquid::Template.parse(IO.read("#{templates}/lista-siglas.tex.liquid")).render('siglas' => siglas)
     end
 
-    # Converte arquivos dos capítulos em asciidoc e converte para Latex imprimindo-os na saída
     capitulos = []
-    if args
-      #puts Liquid::Template.parse(IO.read("#{templates}/textuais.tex.liquid")).render()
-      #puts
-
-      args.each do |capitulo|
-        texto_em_asciidoc = IO.read(capitulo)
-        COMANDO_CONVERSAO_CAPITULO = "asciidoctor-latex -a header=no -d book -"
-        Open3.popen3(COMANDO_CONVERSAO_CAPITULO) {|stdin, stdout, stderr, wait_thr|
-          pid = wait_thr.pid # pid of the started process.
-          stdin.puts texto_em_asciidoc
-          stdin.close
-          capitulos << stdout.read  # texto convertivo para Latex
-        }
-      end
+    COMANDO_CONVERSAO_CAPITULO = "asciidoctor-latex -b latex -d book -a header=no -a numbered -"
+    Dir['*.adoc'].sort.each do |capitulo|
+      next if capitulo === 'rascunho.adoc'
+      # Converte arquivos dos capítulos em asciidoc e converte para Latex imprimindo-os na saída
+      texto_em_asciidoc = IO.read(capitulo)
+      Open3.popen3(COMANDO_CONVERSAO_CAPITULO) {|stdin, stdout, stderr, wait_thr|
+        pid = wait_thr.pid # pid of the started process.
+        stdin.puts texto_em_asciidoc
+        stdin.close
+        capitulos << stdout.read  # texto convertivo para Latex
+      }
     end
     options['capitulos']=capitulos # adiciona os capítulos para rederizar no template
 

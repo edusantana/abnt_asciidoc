@@ -150,7 +150,7 @@
 % Inserir errata
 % ---
 \begin{errata}
-Elemento opcional da \citeonline[4.2.1.2]{NBR14724:2011}. Exemplo:
+Elemento opcional da NBR14724:2011. Exemplo:
 
 \vspace{\onelineskip}
 
@@ -204,13 +204,18 @@ Zootecnia, Universidade de São Paulo, São Paulo, 2011.
     \vspace*{\fill}
    \end{center}
 
-   Trabalho aprovado. \imprimirlocal, 24 de novembro de 2012:
+   Trabalho aprovado. \imprimirlocal, {{data | date: "%D"}}.
 
-   \assinatura{\textbf{\imprimirorientador} \\ Orientador}
-   \assinatura{\textbf{Professor} \\ Convidado 1}
-   \assinatura{\textbf{Professor} \\ Convidado 2}
-   %\assinatura{\textbf{Professor} \\ Convidado 3}
-   %\assinatura{\textbf{Professor} \\ Convidado 4}
+	   \assinatura{\textbf{\imprimirorientador} \\ Orientador}
+	{% if examinador1 %}
+	\assinatura{\textbf{ {{examinador1}} } \\ Examinador}
+	{% endif %}
+	{% if examinador2 %}
+	\assinatura{\textbf{ {{examinador2}} } \\ Examinador}
+	{% endif %}
+	{% if examinador3 %}
+	\assinatura{\textbf{ {{examinador3}} } \\ Examinador}
+	{% endif %}
 
    \begin{center}
     \vspace*{0.5cm}
@@ -277,24 +282,11 @@ Zootecnia, Universidade de São Paulo, São Paulo, 2011.
 % ----------------------------------------------------------
 \textual
 
-
 % Capítulos
 
 {% for capitulo in capitulos %}
 {{ capitulo }}
 {% endfor %}
-
-% ---
-% Capitulo de revisão de literatura
-% ---
-\chapter{Dudu}
-% ---
-
-% ---
-\section{xDudu}
-% ---
-
-texto aqui.
 
 % ----------------------------------------------------------
 % ELEMENTOS PÓS-TEXTUAIS
